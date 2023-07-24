@@ -1,20 +1,28 @@
 const express = require('express');
 
 const router = express.Router();
-const usersController = require('../controllers/usersController');
 const authController = require('../controllers/authController');
+const usersController = require('../controllers/usersController');
 
 router.route('/signup').post(authController.signup);
 router.route('/login').post(authController.login);
+router.route('/logout').get(authController.logout);
 
 router.route('/forgotPassword').post(authController.forgotPassword);
 router.route('/resetPassword/:token').patch(authController.resetPassword);
-router.route('/updatePassword').patch(authController.protect, authController.updatePassword);
 
-router.route('/updateMe').patch(authController.protect, usersController.updateMe);
-router.route('/deleteMe').delete(authController.protect, usersController.deleteMe);
+router.use(authController.protect);
+// every route after this line will use this middleware
 
-router.route('/').get(usersController.getAllUsers).post(usersController.createUser);
+router.route('/me').get(usersController.getMe, usersController.getUser);
+router.route('/updateMe').patch(usersController.updateMe);
+router.route('/updatePassword').patch(authController.updatePassword);
+router.route('/deleteMe').delete(usersController.deleteMe);
+
+router.use(authController.restrictTo('admin'));
+// every route after this line will use this middleware
+
+router.route('/').get(usersController.getAllUsers);
 router
   .route('/:id')
   .get(usersController.getUser)

@@ -46,11 +46,22 @@ exports.login = catchAsync(async (req, res, next) => {
   createToken(user, 200, res);
 });
 
+exports.logout = catchAsync(async (req, res, next) => {
+  res.cookie('jwt', 'Logged out', {
+    expires: new Date(Date.now() + 10000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: 'success' });
+});
+
 exports.protect = catchAsync(async (req, res, next) => {
   let token;
   // check if there is any token
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer'))
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
   if (!token) return next(new AppError('Please log in to get access', 401));
   // token verification
   const payload = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
@@ -61,6 +72,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   if (user.passwordChange(payload.iat))
     return next(new AppError('User recently changed password. Please log in again.', 401));
   req.user = user;
+  res.locals.user = user;
   next();
 });
 
@@ -130,3 +142,24 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // log user in, send JWT
   createToken(user, 200, res);
 });
+
+exports.isLoggedIn = async (req, res, next) => {
+  // check if there is any cookie
+  if (req.cookies.jwt) {
+    try {
+      // token verification
+      const payload = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET);
+      // check if user still exists
+      const user = await User.findById(payload.id);
+      if (!user) return next();
+      // checks if user has changed passoword after token was issued
+      if (user.passwordChange(payload.iat)) return next();
+      // there is logged in user
+      res.locals.user = user;
+      return next();
+    } catch (err) {
+      return next();
+    }
+  }
+  next();
+};

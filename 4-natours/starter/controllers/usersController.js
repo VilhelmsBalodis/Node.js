@@ -1,7 +1,7 @@
 const User = require('../models/userModel');
-// const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const factory = require('./factoryHandlers');
 
 const filterObj = (obj, ...fields) => {
   const resultObj = {};
@@ -11,29 +11,17 @@ const filterObj = (obj, ...fields) => {
   return resultObj;
 };
 
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: { users },
-  });
-});
+exports.getAllUsers = factory.getAll(User);
 
-exports.createUser = (req, res) => {
-  res.status(500).json({ status: 'error', message: 'this route is not yet implemented' });
-};
+exports.getUser = factory.getOne(User);
 
-exports.getUser = (req, res) => {
-  res.status(500).json({ status: 'error', message: 'this route is not yet implemented' });
-};
+exports.updateUser = factory.updateOne(User);
 
-exports.updateUser = (req, res) => {
-  res.status(500).json({ status: 'error', message: 'this route is not yet implemented' });
-};
+exports.deleteUser = factory.deleteOne(User);
 
-exports.deleteUser = (req, res) => {
-  res.status(500).json({ status: 'error', message: 'this route is not yet implemented' });
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
 };
 
 exports.updateMe = catchAsync(async (req, res, next) => {
