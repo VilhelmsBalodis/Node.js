@@ -59,7 +59,6 @@ app.use(
 // request timestamp for testing
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  console.log(req.cookies);
   next();
 });
 
@@ -81,7 +80,3 @@ module.exports = app;
 // routes - left as an example
 // ":" defines variable, ":?" optional parameter, that you don't have to specify necessarily
 // app.get('/api/v1/tours', getAllTours);
-// app.post('/api/v1/tours', createTour);
-// app.get('/api/v1/tours/:id', getTour);
-// app.patch('/api/v1/tours/:id', updateTour);
-// app.delete('/api/v1/tours/:id', deleteTour);

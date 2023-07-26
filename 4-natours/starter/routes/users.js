@@ -1,8 +1,8 @@
 const express = require('express');
-
-const router = express.Router();
 const authController = require('../controllers/authController');
 const usersController = require('../controllers/usersController');
+
+const router = express.Router();
 
 router.route('/signup').post(authController.signup);
 router.route('/login').post(authController.login);
@@ -15,7 +15,13 @@ router.use(authController.protect);
 // every route after this line will use this middleware
 
 router.route('/me').get(usersController.getMe, usersController.getUser);
-router.route('/updateMe').patch(usersController.updateMe);
+router
+  .route('/updateMe')
+  .patch(
+    usersController.uploadUserPhoto,
+    usersController.resizeUserPhoto,
+    usersController.updateMe
+  );
 router.route('/updatePassword').patch(authController.updatePassword);
 router.route('/deleteMe').delete(usersController.deleteMe);
 
