@@ -12017,8 +12017,8 @@ var login = /*#__PURE__*/function () {
           _context.prev = 0;
           _context.next = 3;
           return (0, _axios.default)({
-            method: 'POST',
-            url: 'http://127.0.0.1:3000/api/v1/users/login',
+            method: "POST",
+            url: "http://127.0.0.1:3000/api/v1/users/login",
             data: {
               email: email,
               password: password
@@ -12026,10 +12026,10 @@ var login = /*#__PURE__*/function () {
           });
         case 3:
           res = _context.sent;
-          if (res.data.status === 'success') {
-            (0, _alerts.showAlert)('success', 'Logged in!');
+          if (res.data.status === "success") {
+            (0, _alerts.showAlert)("success", "Logged in!");
             window.setTimeout(function () {
-              location.assign('/');
+              location.assign("/");
             }, 1500);
           }
           _context.next = 10;
@@ -12037,7 +12037,7 @@ var login = /*#__PURE__*/function () {
         case 7:
           _context.prev = 7;
           _context.t0 = _context["catch"](0);
-          (0, _alerts.showAlert)('error', _context.t0.response.data.message);
+          (0, _alerts.showAlert)("error", _context.t0.response.data.message);
         case 10:
         case "end":
           return _context.stop();
@@ -12058,23 +12058,24 @@ var logout = /*#__PURE__*/function () {
           _context2.prev = 0;
           _context2.next = 3;
           return (0, _axios.default)({
-            method: 'GET',
-            url: 'http://127.0.0.1:3000/api/v1/users/logout'
+            method: "GET",
+            url: "http://127.0.0.1:3000/api/v1/users/logout"
           });
         case 3:
           res = _context2.sent;
-          if (res.data.status === 'success') location.reload(true);
-          _context2.next = 10;
+          if (res.data.status === "success") location.reload(true);
+          console.log(res.data.status);
+          _context2.next = 11;
           break;
-        case 7:
-          _context2.prev = 7;
+        case 8:
+          _context2.prev = 8;
           _context2.t0 = _context2["catch"](0);
-          (0, _alerts.showAlert)('error', _context2.t0.response.data.message);
-        case 10:
+          (0, _alerts.showAlert)("error", _context2.t0.response.data.message);
+        case 11:
         case "end":
           return _context2.stop();
       }
-    }, _callee2, null, [[0, 7]]);
+    }, _callee2, null, [[0, 8]]);
   }));
   return function logout() {
     return _ref2.apply(this, arguments);
@@ -12404,7 +12405,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "24594" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "11448" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

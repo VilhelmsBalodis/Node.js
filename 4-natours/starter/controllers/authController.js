@@ -69,10 +69,13 @@ exports.protect = catchAsync(async (req, res, next) => {
   const payload = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
   // check if user still exists
   const user = await User.findById(payload.id);
-  if (!user) return next(new AppError('User, that holds this token, no longer exists', 401));
+  if (!user)
+    return next(new AppError('User, that holds this token, no longer exists', 401));
   // checks if user has changed passoword after token was issued
   if (user.passwordChange(payload.iat))
-    return next(new AppError('User recently changed password. Please log in again.', 401));
+    return next(
+      new AppError('User recently changed password. Please log in again.', 401)
+    );
   req.user = user;
   res.locals.user = user;
   next();
@@ -95,14 +98,11 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const resetToken = user.passwordReset();
   await user.save({ validateBeforeSave: false });
   // send it to user's email
-  const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
-  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to ${resetURL}`;
   try {
-    // await sendEmail({
-    //   email: req.body.email,
-    //   subject: 'Your password reset token (valid for 10 min)',
-    //   message,
-    // });
+    const resetURL = `${req.protocol}://${req.get(
+      'host'
+    )}/api/v1/users/resetPassword/${resetToken}`;
+    await new Email(user, resetURL).sendPasswordReset();
     res.status(200).json({ status: 'success', message: 'Token sent to email' });
   } catch (err) {
     user.passwordResetToken = undefined;
@@ -150,7 +150,10 @@ exports.isLoggedIn = async (req, res, next) => {
   if (req.cookies.jwt) {
     try {
       // token verification
-      const payload = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET);
+      const payload = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
       // check if user still exists
       const user = await User.findById(payload.id);
       if (!user) return next();

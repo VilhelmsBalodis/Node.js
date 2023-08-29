@@ -1,9 +1,10 @@
+// const htmlToText = require('html-to-text');
 const { convert } = require('html-to-text');
 const pug = require('pug');
 const nodemailer = require('nodemailer');
 
 module.exports = class Email {
-  construcor(user, url) {
+  constructor(user, url) {
     this.to = user.email;
     this.firstName = user.name.split(' ')[0];
     this.url = url;
@@ -17,12 +18,14 @@ module.exports = class Email {
     return nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
-      auth: { user: process.env.EMAIL_USERNAME, pass: process.env.EMAIL_PASSWORD },
+      auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+      },
     });
   }
 
   async send(template, subject) {
-    console.log(this.from, this.to);
     // render html page
     const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
       firstName: this.firstName,
@@ -35,14 +38,18 @@ module.exports = class Email {
       to: this.to,
       subject,
       html,
-      text: convert(html),
+      // text: htmlToText.fromString(html),
+      text: convert(html, { wordwrap: false }),
     };
-    console.log(mailOptions.from, mailOptions.to);
     // create transport and send mail
     await this.newTransport().sendMail(mailOptions);
   }
 
   async sendWelcome() {
     await this.send('welcome', 'Welcome to Natours!');
+  }
+
+  async sendPasswordReset() {
+    await this.send('passwordReset', 'Your password reset token is valid for 10 min');
   }
 };
