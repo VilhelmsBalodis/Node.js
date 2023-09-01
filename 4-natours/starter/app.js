@@ -7,6 +7,7 @@ const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 const xss = require('xss-clean');
+const compression = require('compression');
 const AppError = require('./utils/appError');
 const tourRouter = require('./routes/tours');
 const userRouter = require('./routes/users');
@@ -43,6 +44,8 @@ app.use(cookieParser());
 app.use(mongoSanitize());
 // data sanitization against XSS attacks
 app.use(xss());
+// text compression
+app.use(compression());
 // prevent parameter polution
 app.use(
   hpp({
