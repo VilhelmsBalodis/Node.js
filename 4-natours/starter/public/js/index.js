@@ -4,6 +4,7 @@ import '@babel/polyfill';
 import { bookTour } from './stripe';
 import { login, logout } from './login';
 import { displayMap } from './mapbox';
+import { showAlert } from './alerts';
 import { updateSettings } from './updateSettings';
 
 const mapBox = document.getElementById('map');
@@ -60,3 +61,6 @@ if (userPasswordForm)
     document.getElementById('password').value = '';
     document.getElementById('password-confirm').value = '';
   });
+
+const alertMessage = document.querySelector('body').dataset.alert;
+if (alertMessage) showAlert('success', alertMessage, 20);
