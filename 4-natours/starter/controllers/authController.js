@@ -1,6 +1,6 @@
 const { promisify } = require('util');
-const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const Email = require('../utils/email');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
@@ -11,14 +11,13 @@ const signToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES,
   });
 
-const createToken = (user, statusCode, res) => {
+const createToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
-  const cookieOptions = {
+  res.cookie('jwt', token, {
     expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES * 24 * 60 * 60 * 1000),
     httpOnly: true,
-  };
-  if (process.env.NODE_ENV !== 'production') cookieOptions.secure = true;
-  res.cookie('jwt', token, cookieOptions);
+    secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
+  });
   user.password = undefined;
   res.status(statusCode).json({ status: 'success', token, data: { user } });
 };
@@ -34,7 +33,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   });
   const url = `${req.protocol}://${req.get('host')}/me`;
   await new Email(newUser, url).sendWelcome();
-  createToken(newUser, 201, res);
+  createToken(newUser, 201, req, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -45,7 +44,7 @@ exports.login = catchAsync(async (req, res, next) => {
   const user = await User.findOne({ email }).select('+password');
   if (!user || !(await user.passwordCompare(password, user.password)))
     return next(new AppError('Incorrect email or password', 401));
-  createToken(user, 200, res);
+  createToken(user, 200, req, res);
 });
 
 exports.logout = catchAsync(async (req, res, next) => {
@@ -127,7 +126,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.resetTokenExpires = undefined;
   await user.save({ validateBeforeSave: true });
   // log the user in, send JWT
-  createToken(user, 200, res);
+  createToken(user, 200, req, res);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -142,7 +141,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   user.passwordConfirm = req.body.passwordConfirm;
   await user.save();
   // log user in, send JWT
-  createToken(user, 200, res);
+  createToken(user, 200, req, res);
 });
 
 exports.isLoggedIn = async (req, res, next) => {
