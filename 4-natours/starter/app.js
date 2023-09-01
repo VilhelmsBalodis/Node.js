@@ -3,6 +3,7 @@ const hpp = require('hpp');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
+const cors = require('cors');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
@@ -14,6 +15,7 @@ const userRouter = require('./routes/users');
 const reviewRouter = require('./routes/reviews');
 const bookRouter = require('./routes/bookings');
 const viewRouter = require('./routes/views');
+const bookController = require('./controllers/bookController');
 const errorHandler = require('./controllers/errorController');
 
 const app = express();
@@ -38,6 +40,14 @@ const limiter = rateLimit({
 });
 // security HTTP headers
 app.use(helmet());
+// implement cors access-control-allow-origins *
+app.use(cors());
+app.options('*', cors());
+app.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  bookController.webhookChechout
+);
 // body parser from req.body
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extender: true, limit: '10kb' }));
